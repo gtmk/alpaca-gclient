@@ -177,16 +177,16 @@ func (s *Stream) start() {
 			} else if websocket.IsCloseError(err, code) {
 				err := s.reconnect()
 				if err != nil {
-					s.errorC <- err
+					s.ErrorC <- err
 					return
 				}
 				continue
 			} else {
-				s.errorC <- err
+				s.ErrorC <- err
 				continue
 			}
 		}
-		s.messageC <- bts
+		s.MessageC <- bts
 	}
 }
 

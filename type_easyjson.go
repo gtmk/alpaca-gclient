@@ -4,7 +4,6 @@ package alpacaio
 
 import (
 	json "encoding/json"
-
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -119,29 +118,6 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient1(in *jlexer.Lexer, out *St
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Timestamp).UnmarshalJSON(data))
 			}
-		case "c":
-			if in.IsNull() {
-				in.Skip()
-				out.Conditions = nil
-			} else {
-				in.Delim('[')
-				if out.Conditions == nil {
-					if !in.IsDelim(']') {
-						out.Conditions = make([]string, 0, 4)
-					} else {
-						out.Conditions = []string{}
-					}
-				} else {
-					out.Conditions = (out.Conditions)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v4 string
-					v4 = string(in.String())
-					out.Conditions = append(out.Conditions, v4)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
 		case "z":
 			out.Tape = string(in.String())
 		case "bx":
@@ -165,7 +141,13 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient1(in *jlexer.Lexer, out *St
 		case "l":
 			out.Low = float32(in.Float32())
 		case "c":
-			out.Close = float32(in.Float32())
+			if m, ok := out.Close.(easyjson.Unmarshaler); ok {
+				m.UnmarshalEasyJSON(in)
+			} else if m, ok := out.Close.(json.Unmarshaler); ok {
+				_ = m.UnmarshalJSON(in.Raw())
+			} else {
+				out.Close = in.Interface()
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -214,22 +196,6 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient1(out *jwriter.Writer, in S
 		const prefix string = ",\"t\":"
 		out.RawString(prefix)
 		out.Raw((in.Timestamp).MarshalJSON())
-	}
-	{
-		const prefix string = ",\"c\":"
-		out.RawString(prefix)
-		if in.Conditions == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v5, v6 := range in.Conditions {
-				if v5 > 0 {
-					out.RawByte(',')
-				}
-				out.String(string(v6))
-			}
-			out.RawByte(']')
-		}
 	}
 	{
 		const prefix string = ",\"z\":"
@@ -289,7 +255,13 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient1(out *jwriter.Writer, in S
 	{
 		const prefix string = ",\"c\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.Close))
+		if m, ok := in.Close.(easyjson.Marshaler); ok {
+			m.MarshalEasyJSON(out)
+		} else if m, ok := in.Close.(json.Marshaler); ok {
+			out.Raw(m.MarshalJSON())
+		} else {
+			out.Raw(json.Marshal(in.Close))
+		}
 	}
 	out.RawByte('}')
 }
@@ -334,9 +306,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient2(in *jlexer.Lexer, out *St
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v7 StreamTrade
-			(v7).UnmarshalEasyJSON(in)
-			*out = append(*out, v7)
+			var v4 StreamTrade
+			(v4).UnmarshalEasyJSON(in)
+			*out = append(*out, v4)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -350,11 +322,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient2(out *jwriter.Writer, in S
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v8, v9 := range in {
-			if v8 > 0 {
+		for v5, v6 := range in {
+			if v5 > 0 {
 				out.RawByte(',')
 			}
-			(v9).MarshalEasyJSON(out)
+			(v6).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}
@@ -434,9 +406,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient3(in *jlexer.Lexer, out *St
 					out.Conditions = (out.Conditions)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v10 string
-					v10 = string(in.String())
-					out.Conditions = append(out.Conditions, v10)
+					var v7 string
+					v7 = string(in.String())
+					out.Conditions = append(out.Conditions, v7)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -499,11 +471,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient3(out *jwriter.Writer, in S
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Conditions {
-				if v11 > 0 {
+			for v8, v9 := range in.Conditions {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v9))
 			}
 			out.RawByte(']')
 		}
@@ -556,9 +528,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(in *jlexer.Lexer, out *St
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v13 StreamQuote
-			(v13).UnmarshalEasyJSON(in)
-			*out = append(*out, v13)
+			var v10 StreamQuote
+			(v10).UnmarshalEasyJSON(in)
+			*out = append(*out, v10)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -572,11 +544,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(out *jwriter.Writer, in S
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v14, v15 := range in {
-			if v14 > 0 {
+		for v11, v12 := range in {
+			if v11 > 0 {
 				out.RawByte(',')
 			}
-			(v15).MarshalEasyJSON(out)
+			(v12).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}
@@ -760,9 +732,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(in *jlexer.Lexer, out *St
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v16 StreamAggregate
-			(v16).UnmarshalEasyJSON(in)
-			*out = append(*out, v16)
+			var v13 StreamAggregate
+			(v13).UnmarshalEasyJSON(in)
+			*out = append(*out, v13)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -776,11 +748,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(out *jwriter.Writer, in S
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v17, v18 := range in {
-			if v17 > 0 {
+		for v14, v15 := range in {
+			if v14 > 0 {
 				out.RawByte(',')
 			}
-			(v18).MarshalEasyJSON(out)
+			(v15).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}

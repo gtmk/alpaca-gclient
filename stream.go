@@ -72,9 +72,6 @@ func (s *Stream) register() error {
 }
 
 func (s *Stream) Subscribe(channel string, tickers []string) error {
-	//s.Do(func() {
-	//	go s.start()
-	//})
 	if err := s.sub(channel, tickers); err != nil {
 		return err
 	}
@@ -151,8 +148,8 @@ func (s *Stream) auth() error {
 	if err := s.conn.WriteJSON(authRequest); err != nil {
 		return err
 	}
-	connected := ServerMsges{}
-	authorized := ServerMsges{}
+	connected := []ServerAuthMsg{}
+	authorized := []ServerAuthMsg{}
 	// ensure the auth response comes in a timely manner
 	s.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	defer s.conn.SetReadDeadline(time.Time{})
@@ -208,7 +205,7 @@ func (s *Stream) sub(channel string, tickers []string) error {
 	for _, t := range tickers {
 		subs[channel] = t
 	}
-	subReq := ClientMsg{
+	subReq := ClientSubcribeMsg{
 		Action: "subscribe",
 	}
 	switch channel {
@@ -231,7 +228,7 @@ func (s *Stream) unsub(channel string, tickers []string) error {
 	s.Lock()
 
 	defer s.Unlock()
-	subReq := ClientMsg{
+	subReq := ClientSubcribeMsg{
 		Action: "unsubscribe",
 	}
 	switch channel {
@@ -266,16 +263,14 @@ type ClientAuthMsg struct {
 	SecretKey string `json:"secret",omitempty`
 }
 
-type ClientMsg struct {
+type ClientSubcribeMsg struct {
 	Action string   `json:"action,omitempty" msgpack:"action"`
 	Trades []string `json:"trades,omitempty"`
 	Quotes []string `json:"quotes,omitempty"`
 	Bars   []string `json:"bars,omitempty"`
 }
 
-type ServerMsg struct {
+type ServerAuthMsg struct {
 	EventName string `json:"T" msgpack:"stream"`
 	Message   string `json:"msg"`
 }
-
-type ServerMsges []ServerMsg

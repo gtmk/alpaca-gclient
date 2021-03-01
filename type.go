@@ -3,15 +3,14 @@ package alpacaio
 import "time"
 
 type StreamingServerMsg struct {
-	Event      string    `json:"T"`
-	Symbol     string    `json:"S"`
-	TradeID    int64     `json:"i"`
-	Exchange   string    `json:"x"`
-	Price      float32   `json:"p"`
-	Size       int32     `json:"s"`
-	Timestamp  time.Time `json:"t"`
-	Conditions []string  `json:"c"`
-	Tape       string    `json:"z"`
+	Event     string    `json:"T"`
+	Symbol    string    `json:"S"`
+	TradeID   int64     `json:"i"`
+	Exchange  string    `json:"x"`
+	Price     float32   `json:"p"`
+	Size      int32     `json:"s"`
+	Timestamp time.Time `json:"t"`
+	Tape      string    `json:"z"`
 	// Quote
 	BidExchange int32   `json:"bx"`
 	AskExchange int32   `json:"ax"`
@@ -20,11 +19,11 @@ type StreamingServerMsg struct {
 	BidSize     int32   `json:"bs"`
 	AskSize     int32   `json:"as"`
 	// Bar
-	Volume int32   `json:"v"`
-	Open   float32 `json:"o"`
-	High   float32 `json:"h"`
-	Low    float32 `json:"l"`
-	Close  float32 `json:"c"`
+	Volume int32       `json:"v"`
+	Open   float32     `json:"o"`
+	High   float32     `json:"h"`
+	Low    float32     `json:"l"`
+	Close  interface{} `json:"c"`
 }
 
 //easyjson:json

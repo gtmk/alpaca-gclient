@@ -3,7 +3,6 @@ package alpacaio
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -68,20 +67,21 @@ func (s *Stream) register() error {
 	if err = s.auth(); err != nil {
 		return err
 	}
+	go s.start()
 	return nil
 }
 
-func (s *Stream) Subscribe(channel string) error {
-	s.Do(func() {
-		go s.start()
-	})
-	if err := s.sub(channel); err != nil {
+func (s *Stream) Subscribe(channel string, tickers []string) error {
+	//s.Do(func() {
+	//	go s.start()
+	//})
+	if err := s.sub(channel, tickers); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Stream) Unsubscribe(channel string) error {
+func (s *Stream) Unsubscribe(channel string, tickers []string) error {
 	var err error
 	if s.conn == nil {
 		return errors.New("connection has not been initialized")
@@ -89,7 +89,7 @@ func (s *Stream) Unsubscribe(channel string) error {
 	if err = s.auth(); err != nil {
 		return err
 	}
-	if err = s.unsub(channel); err != nil {
+	if err = s.unsub(channel, tickers); err != nil {
 		return err
 	}
 	return nil
@@ -142,32 +142,36 @@ func (s *Stream) auth() error {
 	if s.isAuthenticated() {
 		return nil
 	}
-	authRequest := ClientMsg{
-		Action: "authenticate",
-		Data: map[string]interface{}{
-			"key_id":     s.credentials.apiKey,
-			"secret_key": s.credentials.secretKey,
-		},
+	authRequest := ClientAuthMsg{
+		Action:    "auth",
+		APIKey:    s.credentials.apiKey,
+		SecretKey: s.credentials.secretKey,
 	}
 
 	if err := s.conn.WriteJSON(authRequest); err != nil {
 		return err
 	}
-	msg := ServerMsg{}
+	connected := ServerMsges{}
+	authorized := ServerMsges{}
 	// ensure the auth response comes in a timely manner
 	s.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	defer s.conn.SetReadDeadline(time.Time{})
 
-	if err := s.conn.ReadJSON(&msg); err != nil {
+	if err := s.conn.ReadJSON(&connected); err != nil {
 		return err
 	}
-	m := msg.Data.(map[string]interface{})
-
-	if !strings.EqualFold(m["status"].(string), "authorized") {
-		return fmt.Errorf("failed to authorize alpaca stream")
+	if err := s.conn.ReadJSON(&authorized); err != nil {
+		return err
 	}
-	s.authenticated.Store(true)
-	return nil
+
+	fmt.Println(append(connected, authorized...))
+	for _, m := range append(connected, authorized...) {
+		if m.Message == "authenticated" {
+			s.authenticated.Store(true)
+			return nil
+		}
+	}
+	return fmt.Errorf("failed to authorize alpaca stream")
 }
 
 func (s *Stream) start() {
@@ -180,29 +184,42 @@ func (s *Stream) start() {
 				err := s.reconnect()
 				if err != nil {
 					s.ErrorC <- err
+					s.conn = nil
+					fmt.Println(fmt.Sprintf("unknown error %+v", err))
 					return
 				}
 				continue
 			} else {
 				s.ErrorC <- err
-				continue
+				s.conn = nil
+				fmt.Println(fmt.Sprintf("unknown error %+v", err))
+				return
 			}
 		}
 		s.MessageC <- bts
 	}
 }
 
-func (s *Stream) sub(channel string) error {
+func (s *Stream) sub(channel string, tickers []string) error {
 	s.Lock()
 	defer s.Unlock()
 
+	subs := make(map[string]interface{}, len(tickers))
+	for _, t := range tickers {
+		subs[channel] = t
+	}
 	subReq := ClientMsg{
-		Action: "listen",
-		Data: map[string]interface{}{
-			"streams": []interface{}{
-				channel,
-			},
-		},
+		Action: "subscribe",
+	}
+	switch channel {
+	case `trades`:
+		subReq.Trades = tickers
+	case `quotes`:
+		subReq.Trades = tickers
+	case `bars`:
+		subReq.Bars = tickers
+	default:
+		return fmt.Errorf("unknown channel")
 	}
 	if err := s.conn.WriteJSON(subReq); err != nil {
 		return err
@@ -210,16 +227,22 @@ func (s *Stream) sub(channel string) error {
 	return nil
 }
 
-func (s *Stream) unsub(channel string) error {
+func (s *Stream) unsub(channel string, tickers []string) error {
 	s.Lock()
+
 	defer s.Unlock()
 	subReq := ClientMsg{
-		Action: "unlisten",
-		Data: map[string]interface{}{
-			"streams": []interface{}{
-				channel,
-			},
-		},
+		Action: "unsubscribe",
+	}
+	switch channel {
+	case `trades`:
+		subReq.Trades = tickers
+	case `quotes`:
+		subReq.Trades = tickers
+	case `bars`:
+		subReq.Bars = tickers
+	default:
+		return fmt.Errorf("unknown channel")
 	}
 	err := s.conn.WriteJSON(subReq)
 	return err
@@ -237,12 +260,22 @@ func (s *Stream) reconnect() error {
 	return nil
 }
 
+type ClientAuthMsg struct {
+	Action    string `json:"action,omitempty" msgpack:"action"`
+	APIKey    string `json:"key,omitempty"`
+	SecretKey string `json:"secret",omitempty`
+}
+
 type ClientMsg struct {
-	Action string      `json:"action" msgpack:"action"`
-	Data   interface{} `json:"data" msgpack:"data"`
+	Action string   `json:"action,omitempty" msgpack:"action"`
+	Trades []string `json:"trades,omitempty"`
+	Quotes []string `json:"quotes,omitempty"`
+	Bars   []string `json:"bars,omitempty"`
 }
 
 type ServerMsg struct {
-	Stream string      `json:"stream" msgpack:"stream"`
-	Data   interface{} `json:"data"`
+	EventName string `json:"T" msgpack:"stream"`
+	Message   string `json:"msg"`
 }
+
+type ServerMsges []ServerMsg

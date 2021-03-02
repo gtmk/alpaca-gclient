@@ -60,7 +60,7 @@ type StreamingServerMsg struct {
 }
 
 //easyjson:json
-type StreamingServerMsges []StreamingServerMsges
+type StreamingServerMsges []StreamingServerMsg
 
 type Trade struct {
 	Event      string    `json:"T"`

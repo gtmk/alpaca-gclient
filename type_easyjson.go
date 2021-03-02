@@ -248,7 +248,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient2(in *jlexer.Lexer, out *St
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(StreamingServerMsges, 0, 2)
+				*out = make(StreamingServerMsges, 0, 0)
 			} else {
 				*out = StreamingServerMsges{}
 			}
@@ -256,7 +256,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient2(in *jlexer.Lexer, out *St
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v7 StreamingServerMsges
+			var v7 StreamingServerMsg
 			(v7).UnmarshalEasyJSON(in)
 			*out = append(*out, v7)
 			in.WantComma()

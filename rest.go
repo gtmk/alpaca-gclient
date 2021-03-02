@@ -71,23 +71,7 @@ func WithBaseURL(baseURL string) func(*Client) {
 	}
 }
 
-//func (c *Client) GetJSON(ctx context.Context, endpoint string, v interface{}) error {
-//	//address, err := c.addToken(endpoint)
-//	//if err != nil {
-//	//	return err
-//	//}
-//	data, err := c.getBytes(ctx, address)
-//	if err != nil {
-//		return err
-//	}
-//	return json.Unmarshal(data, v)
-//}
-
 func (c *Client) GetBytes(ctx context.Context, endpoint string) ([]byte, error) {
-	//address, err := c.addToken(endpoint)
-	//if err != nil {
-	//	return []byte{}, err
-	//}
 	return c.getBytes(ctx, endpoint)
 }
 
@@ -119,17 +103,6 @@ func (c *Client) addHeaders(req *http.Request) {
 	req.Header.Add("APCA-API-KEY-ID", c.apiKey)
 	req.Header.Add("APCA-API-SECRET-KEY", c.secretKey)
 }
-
-//func (c *Client) addToken(endpoint string) (string, error) {
-//	u, err := url.Parse(c.baseURL + endpoint)
-//	if err != nil {
-//		return "", err
-//	}
-//	v := u.Query()
-//	v.Add("apiKey", c.token)
-//	u.RawQuery = v.Encode()
-//	return u.String(), nil
-//}
 
 func (c *Client) endpointWithOpts(endpoint string, opts *RequestOptions) (string, error) {
 	if opts == nil {

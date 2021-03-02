@@ -1,6 +1,7 @@
 package alpacaio
 
 import (
+	json "encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	ej "github.com/mailru/easyjson"
 )
 
 const (
@@ -273,4 +275,16 @@ type ClientSubcribeMsg struct {
 type ServerAuthMsg struct {
 	EventName string `json:"T" msgpack:"stream"`
 	Message   string `json:"msg"`
+}
+
+func ParseEvents(bts []byte, isEJ ...bool) (StreamingServerMsges, error) {
+	iEJ := true
+	var out StreamingServerMsges
+	var err error
+	if iEJ {
+		err = ej.Unmarshal(bts, &out)
+	} else {
+		err = json.Unmarshal(bts, &out)
+	}
+	return out, err
 }

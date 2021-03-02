@@ -2,6 +2,39 @@ package alpacaio
 
 import "time"
 
+type Bar struct {
+	Timestamp time.Time `json:"t"`
+	Open      float32   `json:"o"`
+	High      float32   `json:"h"`
+	Low       float32   `json:"l"`
+	Close     float32   `json:"c"`
+	Volume    int64     `json:"v"`
+}
+
+type Bars []Bar
+
+type StockBarsResponse struct {
+	Symbol    string `json:"symbol"`
+	PageToken string `json:"next_page_token"`
+	Bars      Bars   `json:"bars"`
+}
+
+type Timespan string
+
+const (
+	Minute Timespan = "1Min"
+	Hour   Timespan = "1Hour"
+	Day    Timespan = "1Day"
+)
+
+type RequestOptions struct {
+	PageToken string `url:"page_token,omitempty"`
+	Limit     int32  `url:"limit,omitempty"`
+	Start     string `url:"start,omitempty"`
+	End       string `url:"end,omitempty"`
+	Timeframe string `url:"timeframe,omitempty"`
+}
+
 type StreamingServerMsg struct {
 	Event     string    `json:"T"`
 	Symbol    string    `json:"S"`
@@ -31,7 +64,7 @@ type StreamingServerMsges []StreamingServerMsges
 
 // StreamTrade is the structure that defines a trade that
 // polygon transmits via websocket protocol.
-type StreamTrade struct {
+type Trade struct {
 	Event      string    `json:"T"`
 	Symbol     string    `json:"S"`
 	TradeID    int64     `json:"i"`
@@ -44,16 +77,22 @@ type StreamTrade struct {
 }
 
 //easyjson:json
-type StreamTrades []StreamTrade
+type Trades []Trade
+
+type StockTradesResponse struct {
+	Symbol    string `json:"symbol"`
+	PageToken string `json:"next_page_token"`
+	Trades    Trades `json:"trades"`
+}
 
 // StreamQuote is the structure that defines a quote that
 // polygon transmits via websocket protocol.
-type StreamQuote struct {
+type Quote struct {
 	Event       string    `json:"T"`
 	Symbol      string    `json:"S"`
-	Condition   int32     `json:"c"`
-	BidExchange int32     `json:"bx"`
-	AskExchange int32     `json:"ax"`
+	Condition   []string  `json:"c"`
+	BidExchange string    `json:"bx"`
+	AskExchange string    `json:"ax"`
 	BidPrice    float32   `json:"bp"`
 	AskPrice    float32   `json:"ap"`
 	BidSize     int32     `json:"bs"`
@@ -63,7 +102,13 @@ type StreamQuote struct {
 }
 
 //easyjson:json
-type StreamQuotes []StreamQuote
+type Quotes []Quote
+
+type StockQuotesResponse struct {
+	Symbol    string `json:"symbol"`
+	PageToken string `json:"next_page_token"`
+	Quotes    Quotes `json:"quotes"`
+}
 
 // StreamAggregate is the structure that defines an aggregate that
 // polygon transmits via websocket protocol.

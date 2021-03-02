@@ -62,8 +62,6 @@ type StreamingServerMsg struct {
 //easyjson:json
 type StreamingServerMsges []StreamingServerMsges
 
-// StreamTrade is the structure that defines a trade that
-// polygon transmits via websocket protocol.
 type Trade struct {
 	Event      string    `json:"T"`
 	Symbol     string    `json:"S"`
@@ -85,8 +83,6 @@ type StockTradesResponse struct {
 	Trades    Trades `json:"trades"`
 }
 
-// StreamQuote is the structure that defines a quote that
-// polygon transmits via websocket protocol.
 type Quote struct {
 	Event       string    `json:"T"`
 	Symbol      string    `json:"S"`
@@ -110,8 +106,6 @@ type StockQuotesResponse struct {
 	Quotes    Quotes `json:"quotes"`
 }
 
-// StreamAggregate is the structure that defines an aggregate that
-// polygon transmits via websocket protocol.
 type StreamAggregate struct {
 	Event     string    `json:"T"`
 	Symbol    string    `json:"S"`

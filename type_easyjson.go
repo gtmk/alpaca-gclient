@@ -363,12 +363,12 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient3(in *jlexer.Lexer, out *St
 		case "l":
 			out.Low = float32(in.Float32())
 		case "c":
-			if m, ok := out.Close.(easyjson.Unmarshaler); ok {
+			if m, ok := out.C.(easyjson.Unmarshaler); ok {
 				m.UnmarshalEasyJSON(in)
-			} else if m, ok := out.Close.(json.Unmarshaler); ok {
+			} else if m, ok := out.C.(json.Unmarshaler); ok {
 				_ = m.UnmarshalJSON(in.Raw())
 			} else {
-				out.Close = in.Interface()
+				out.C = in.Interface()
 			}
 		default:
 			in.SkipRecursive()
@@ -477,12 +477,12 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient3(out *jwriter.Writer, in S
 	{
 		const prefix string = ",\"c\":"
 		out.RawString(prefix)
-		if m, ok := in.Close.(easyjson.Marshaler); ok {
+		if m, ok := in.C.(easyjson.Marshaler); ok {
 			m.MarshalEasyJSON(out)
-		} else if m, ok := in.Close.(json.Marshaler); ok {
+		} else if m, ok := in.C.(json.Marshaler); ok {
 			out.Raw(m.MarshalJSON())
 		} else {
-			out.Raw(json.Marshal(in.Close))
+			out.Raw(json.Marshal(in.C))
 		}
 	}
 	out.RawByte('}')
@@ -511,190 +511,7 @@ func (v *StreamingServerMsg) UnmarshalJSON(data []byte) error {
 func (v *StreamingServerMsg) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient3(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(in *jlexer.Lexer, out *StreamAggregates) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		in.Skip()
-		*out = nil
-	} else {
-		in.Delim('[')
-		if *out == nil {
-			if !in.IsDelim(']') {
-				*out = make(StreamAggregates, 0, 0)
-			} else {
-				*out = StreamAggregates{}
-			}
-		} else {
-			*out = (*out)[:0]
-		}
-		for !in.IsDelim(']') {
-			var v10 StreamAggregate
-			(v10).UnmarshalEasyJSON(in)
-			*out = append(*out, v10)
-			in.WantComma()
-		}
-		in.Delim(']')
-	}
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(out *jwriter.Writer, in StreamAggregates) {
-	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v11, v12 := range in {
-			if v11 > 0 {
-				out.RawByte(',')
-			}
-			(v12).MarshalEasyJSON(out)
-		}
-		out.RawByte(']')
-	}
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v StreamAggregates) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v StreamAggregates) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *StreamAggregates) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *StreamAggregates) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(l, v)
-}
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(in *jlexer.Lexer, out *StreamAggregate) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "T":
-			out.Event = string(in.String())
-		case "S":
-			out.Symbol = string(in.String())
-		case "v":
-			out.Volume = int32(in.Int32())
-		case "o":
-			out.Open = float32(in.Float32())
-		case "h":
-			out.High = float32(in.Float32())
-		case "l":
-			out.Low = float32(in.Float32())
-		case "c":
-			out.Close = float32(in.Float32())
-		case "s":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Timestamp).UnmarshalJSON(data))
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(out *jwriter.Writer, in StreamAggregate) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"T\":"
-		out.RawString(prefix[1:])
-		out.String(string(in.Event))
-	}
-	{
-		const prefix string = ",\"S\":"
-		out.RawString(prefix)
-		out.String(string(in.Symbol))
-	}
-	{
-		const prefix string = ",\"v\":"
-		out.RawString(prefix)
-		out.Int32(int32(in.Volume))
-	}
-	{
-		const prefix string = ",\"o\":"
-		out.RawString(prefix)
-		out.Float32(float32(in.Open))
-	}
-	{
-		const prefix string = ",\"h\":"
-		out.RawString(prefix)
-		out.Float32(float32(in.High))
-	}
-	{
-		const prefix string = ",\"l\":"
-		out.RawString(prefix)
-		out.Float32(float32(in.Low))
-	}
-	{
-		const prefix string = ",\"c\":"
-		out.RawString(prefix)
-		out.Float32(float32(in.Close))
-	}
-	{
-		const prefix string = ",\"s\":"
-		out.RawString(prefix)
-		out.Raw((in.Timestamp).MarshalJSON())
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v StreamAggregate) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v StreamAggregate) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *StreamAggregate) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *StreamAggregate) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(l, v)
-}
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(in *jlexer.Lexer, out *StockTradesResponse) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(in *jlexer.Lexer, out *StockTradesResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -729,7 +546,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(in *jlexer.Lexer, out *St
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(out *jwriter.Writer, in StockTradesResponse) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(out *jwriter.Writer, in StockTradesResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -754,27 +571,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(out *jwriter.Writer, in S
 // MarshalJSON supports json.Marshaler interface
 func (v StockTradesResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v StockTradesResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *StockTradesResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *StockTradesResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient4(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(in *jlexer.Lexer, out *StockQuotesResponse) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(in *jlexer.Lexer, out *StockQuotesResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -809,7 +626,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(in *jlexer.Lexer, out *St
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(out *jwriter.Writer, in StockQuotesResponse) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(out *jwriter.Writer, in StockQuotesResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -834,27 +651,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(out *jwriter.Writer, in S
 // MarshalJSON supports json.Marshaler interface
 func (v StockQuotesResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v StockQuotesResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *StockQuotesResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *StockQuotesResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient5(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(in *jlexer.Lexer, out *StockBarsResponse) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(in *jlexer.Lexer, out *StockBarsResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -893,9 +710,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(in *jlexer.Lexer, out *St
 					out.Bars = (out.Bars)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v13 Bar
-					(v13).UnmarshalEasyJSON(in)
-					out.Bars = append(out.Bars, v13)
+					var v10 Bar
+					(v10).UnmarshalEasyJSON(in)
+					out.Bars = append(out.Bars, v10)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -910,7 +727,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(in *jlexer.Lexer, out *St
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(out *jwriter.Writer, in StockBarsResponse) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(out *jwriter.Writer, in StockBarsResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -931,11 +748,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(out *jwriter.Writer, in S
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v14, v15 := range in.Bars {
-				if v14 > 0 {
+			for v11, v12 := range in.Bars {
+				if v11 > 0 {
 					out.RawByte(',')
 				}
-				(v15).MarshalEasyJSON(out)
+				(v12).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -946,27 +763,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(out *jwriter.Writer, in S
 // MarshalJSON supports json.Marshaler interface
 func (v StockBarsResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v StockBarsResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *StockBarsResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *StockBarsResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient6(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(in *jlexer.Lexer, out *RequestOptions) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(in *jlexer.Lexer, out *RequestOptions) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1005,7 +822,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(in *jlexer.Lexer, out *Re
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(out *jwriter.Writer, in RequestOptions) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(out *jwriter.Writer, in RequestOptions) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1040,27 +857,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(out *jwriter.Writer, in R
 // MarshalJSON supports json.Marshaler interface
 func (v RequestOptions) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RequestOptions) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RequestOptions) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RequestOptions) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient7(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(in *jlexer.Lexer, out *Quotes) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(in *jlexer.Lexer, out *Quotes) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -1077,9 +894,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(in *jlexer.Lexer, out *Q
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v16 Quote
-			(v16).UnmarshalEasyJSON(in)
-			*out = append(*out, v16)
+			var v13 Quote
+			(v13).UnmarshalEasyJSON(in)
+			*out = append(*out, v13)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -1088,16 +905,16 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(in *jlexer.Lexer, out *Q
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(out *jwriter.Writer, in Quotes) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(out *jwriter.Writer, in Quotes) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v17, v18 := range in {
-			if v17 > 0 {
+		for v14, v15 := range in {
+			if v14 > 0 {
 				out.RawByte(',')
 			}
-			(v18).MarshalEasyJSON(out)
+			(v15).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}
@@ -1106,27 +923,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(out *jwriter.Writer, in 
 // MarshalJSON supports json.Marshaler interface
 func (v Quotes) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Quotes) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient8(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Quotes) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Quotes) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient8(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(in *jlexer.Lexer, out *Quote) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(in *jlexer.Lexer, out *Quote) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1165,9 +982,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(in *jlexer.Lexer, out *Q
 					out.Condition = (out.Condition)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v19 string
-					v19 = string(in.String())
-					out.Condition = append(out.Condition, v19)
+					var v16 string
+					v16 = string(in.String())
+					out.Condition = append(out.Condition, v16)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1200,7 +1017,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(in *jlexer.Lexer, out *Q
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(out *jwriter.Writer, in Quote) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(out *jwriter.Writer, in Quote) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1221,11 +1038,11 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(out *jwriter.Writer, in 
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v20, v21 := range in.Condition {
-				if v20 > 0 {
+			for v17, v18 := range in.Condition {
+				if v17 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v21))
+				out.String(string(v18))
 			}
 			out.RawByte(']')
 		}
@@ -1276,27 +1093,27 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(out *jwriter.Writer, in 
 // MarshalJSON supports json.Marshaler interface
 func (v Quote) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Quote) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Quote) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(&r, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Quote) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(l, v)
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient9(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient12(in *jlexer.Lexer, out *Bar) {
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(in *jlexer.Lexer, out *Bar) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1339,7 +1156,7 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient12(in *jlexer.Lexer, out *B
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(out *jwriter.Writer, in Bar) {
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(out *jwriter.Writer, in Bar) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1379,23 +1196,206 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(out *jwriter.Writer, in 
 // MarshalJSON supports json.Marshaler interface
 func (v Bar) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(&w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Bar) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(w, v)
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient10(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Bar) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Bar) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient10(l, v)
+}
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(in *jlexer.Lexer, out *AggregatedBars) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(AggregatedBars, 0, 0)
+			} else {
+				*out = AggregatedBars{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v19 AggregatedBar
+			(v19).UnmarshalEasyJSON(in)
+			*out = append(*out, v19)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(out *jwriter.Writer, in AggregatedBars) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v20, v21 := range in {
+			if v20 > 0 {
+				out.RawByte(',')
+			}
+			(v21).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AggregatedBars) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AggregatedBars) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient11(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AggregatedBars) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *AggregatedBars) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient11(l, v)
+}
+func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient12(in *jlexer.Lexer, out *AggregatedBar) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "T":
+			out.Event = string(in.String())
+		case "S":
+			out.Symbol = string(in.String())
+		case "v":
+			out.Volume = int32(in.Int32())
+		case "o":
+			out.Open = float32(in.Float32())
+		case "h":
+			out.High = float32(in.Float32())
+		case "l":
+			out.Low = float32(in.Float32())
+		case "c":
+			out.Close = float32(in.Float32())
+		case "s":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Timestamp).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(out *jwriter.Writer, in AggregatedBar) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"T\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Event))
+	}
+	{
+		const prefix string = ",\"S\":"
+		out.RawString(prefix)
+		out.String(string(in.Symbol))
+	}
+	{
+		const prefix string = ",\"v\":"
+		out.RawString(prefix)
+		out.Int32(int32(in.Volume))
+	}
+	{
+		const prefix string = ",\"o\":"
+		out.RawString(prefix)
+		out.Float32(float32(in.Open))
+	}
+	{
+		const prefix string = ",\"h\":"
+		out.RawString(prefix)
+		out.Float32(float32(in.High))
+	}
+	{
+		const prefix string = ",\"l\":"
+		out.RawString(prefix)
+		out.Float32(float32(in.Low))
+	}
+	{
+		const prefix string = ",\"c\":"
+		out.RawString(prefix)
+		out.Float32(float32(in.Close))
+	}
+	{
+		const prefix string = ",\"s\":"
+		out.RawString(prefix)
+		out.Raw((in.Timestamp).MarshalJSON())
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AggregatedBar) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AggregatedBar) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient12(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AggregatedBar) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient12(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Bar) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *AggregatedBar) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient12(l, v)
 }

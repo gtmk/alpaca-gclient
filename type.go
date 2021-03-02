@@ -56,7 +56,7 @@ type StreamingServerMsg struct {
 	Open   float32     `json:"o"`
 	High   float32     `json:"h"`
 	Low    float32     `json:"l"`
-	Close  interface{} `json:"c"`
+	C      interface{} `json:"c"`
 }
 
 //easyjson:json
@@ -106,7 +106,7 @@ type StockQuotesResponse struct {
 	Quotes    Quotes `json:"quotes"`
 }
 
-type StreamAggregate struct {
+type AggregatedBar struct {
 	Event     string    `json:"T"`
 	Symbol    string    `json:"S"`
 	Volume    int32     `json:"v"`
@@ -118,4 +118,4 @@ type StreamAggregate struct {
 }
 
 //easyjson:json
-type StreamAggregates []StreamAggregate
+type AggregatedBars []AggregatedBar

@@ -58,11 +58,12 @@ func GetStream(apiKey, secretKey, streamEndpoint string) (*Stream, error) {
 	return stream, nil
 }
 
-func (s *Stream) register() error {
+func (s *Stream) Register() error {
 	var err error
 	if s.conn == nil {
 		s.conn, err = s.openSocket()
 		if err != nil {
+			fmt.Println(fmt.Sprintf("failed to open with err %+v", err))
 			return err
 		}
 	}

@@ -51,7 +51,7 @@ func GetStream(apiKey, secretKey, streamEndpoint string) (*Stream, error) {
 		stream.authenticated.Store(false)
 		stream.closed.Store(false)
 	})
-	err := stream.register()
+	err := stream.Register()
 	if err != nil {
 		return nil, err
 	}

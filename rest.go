@@ -123,8 +123,8 @@ func (c *Client) StockAggregates(ticker string, timespan Timespan, from, to time
 	if opts == nil {
 		opts = &RequestOptions{Limit: 10000}
 	}
-	opts.Start = from.Format(DateLayoutISO)
-	opts.End = to.Format(DateLayoutISO)
+	opts.Start = from.Format(time.RFC3339)
+	opts.End = to.Format(time.RFC3339)
 	opts.Timeframe = string(timespan)
 	var out StockBarsResponse
 	endpoint := fmt.Sprintf("/v2/stocks/%s/bars", url.PathEscape(ticker))
@@ -144,8 +144,8 @@ func (c *Client) StockTrades(ticker string, from, to time.Time, opts *RequestOpt
 	if opts == nil {
 		opts = &RequestOptions{Limit: 10000}
 	}
-	opts.Start = from.Format(DateLayoutISO)
-	opts.End = to.Format(DateLayoutISO)
+	opts.Start = from.Format(time.RFC3339)
+	opts.End = to.Format(time.RFC3339)
 	var out StockTradesResponse
 	endpoint := fmt.Sprintf(`/v2/stocks/%s/trades`, url.PathEscape(ticker))
 	endpoint, err := c.endpointWithOpts(endpoint, opts)
@@ -178,4 +178,46 @@ func (c *Client) StockQuotes(ticker string, from, to time.Time, opts *RequestOpt
 	}
 	err = ej.Unmarshal(bts, &out)
 	return &out, err
+}
+
+func (c *Client) StockDailyTrades(ticker string, date time.Time, opts *RequestOptions) ([]*Trades, error) {
+	if opts == nil {
+		opts = &RequestOptions{Limit: 10000}
+	}
+	var out []*Trades
+	for {
+		rs, err := c.StockTrades(ticker, date, date.Add(time.Duration(24)*time.Hour), opts)
+		if err != nil {
+			return nil, err
+		}
+		if len(rs.Trades) < int(opts.Limit) {
+			out = append(out, &(rs.Trades))
+			break
+		}
+		//fmt.Println(rs.Trades[0], rs.Trades[len(rs.Trades)-1], len(rs.Trades))
+		out = append(out, &(rs.Trades))
+		opts.PageToken = rs.PageToken
+	}
+	return out, nil
+}
+
+func (c *Client) StockDailyQuotes(ticker string, date time.Time, opts *RequestOptions) ([]*Quotes, error) {
+	if opts == nil {
+		opts = &RequestOptions{Limit: 10000}
+	}
+	var out []*Quotes
+	for {
+		rs, err := c.StockQuotes(ticker, date, date.Add(time.Duration(24)*time.Hour), opts)
+		if err != nil {
+			return nil, err
+		}
+		if len(rs.Quotes) < int(opts.Limit) {
+			out = append(out, &(rs.Quotes))
+			break
+		}
+		fmt.Println(rs.Quotes[0], rs.Quotes[len(rs.Quotes)-1], len(rs.Quotes))
+		out = append(out, &(rs.Quotes))
+		opts.PageToken = rs.PageToken
+	}
+	return out, nil
 }

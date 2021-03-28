@@ -215,7 +215,7 @@ func (c *Client) StockDailyQuotes(ticker string, date time.Time, opts *RequestOp
 			out = append(out, &(rs.Quotes))
 			break
 		}
-		fmt.Println(rs.Quotes[0], rs.Quotes[len(rs.Quotes)-1], len(rs.Quotes))
+		//fmt.Println(rs.Quotes[0], rs.Quotes[len(rs.Quotes)-1], len(rs.Quotes))
 		out = append(out, &(rs.Quotes))
 		opts.PageToken = rs.PageToken
 	}

@@ -343,9 +343,9 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient3(in *jlexer.Lexer, out *St
 		case "z":
 			out.Tape = string(in.String())
 		case "bx":
-			out.BidExchange = int32(in.Int32())
+			out.BidExchange = string(in.String())
 		case "ax":
-			out.AskExchange = int32(in.Int32())
+			out.AskExchange = string(in.String())
 		case "bp":
 			out.BidPrice = float32(in.Float32())
 		case "ap":
@@ -370,6 +370,10 @@ func easyjsonBc289ab0DecodeGithubComGtmkAlpacaGclient3(in *jlexer.Lexer, out *St
 			} else {
 				out.C = in.Interface()
 			}
+		case "msg":
+			out.Message = string(in.String())
+		case "code":
+			out.Code = int32(in.Int32())
 		default:
 			in.SkipRecursive()
 		}
@@ -427,12 +431,12 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient3(out *jwriter.Writer, in S
 	{
 		const prefix string = ",\"bx\":"
 		out.RawString(prefix)
-		out.Int32(int32(in.BidExchange))
+		out.String(string(in.BidExchange))
 	}
 	{
 		const prefix string = ",\"ax\":"
 		out.RawString(prefix)
-		out.Int32(int32(in.AskExchange))
+		out.String(string(in.AskExchange))
 	}
 	{
 		const prefix string = ",\"bp\":"
@@ -484,6 +488,16 @@ func easyjsonBc289ab0EncodeGithubComGtmkAlpacaGclient3(out *jwriter.Writer, in S
 		} else {
 			out.Raw(json.Marshal(in.C))
 		}
+	}
+	{
+		const prefix string = ",\"msg\":"
+		out.RawString(prefix)
+		out.String(string(in.Message))
+	}
+	{
+		const prefix string = ",\"code\":"
+		out.RawString(prefix)
+		out.Int32(int32(in.Code))
 	}
 	out.RawByte('}')
 }

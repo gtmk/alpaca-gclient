@@ -45,8 +45,8 @@ type StreamingServerMsg struct {
 	Timestamp time.Time `json:"t"`
 	Tape      string    `json:"z"`
 	// Quote
-	BidExchange int32   `json:"bx"`
-	AskExchange int32   `json:"ax"`
+	BidExchange string  `json:"bx"`
+	AskExchange string  `json:"ax"`
 	BidPrice    float32 `json:"bp"`
 	AskPrice    float32 `json:"ap"`
 	BidSize     int32   `json:"bs"`
@@ -57,6 +57,9 @@ type StreamingServerMsg struct {
 	High   float32     `json:"h"`
 	Low    float32     `json:"l"`
 	C      interface{} `json:"c"`
+	// Error
+	Message string `json:"msg"`
+	Code    int32  `json:"code"`
 }
 
 //easyjson:json

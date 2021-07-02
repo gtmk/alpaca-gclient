@@ -194,7 +194,6 @@ func (c *Client) StockDailyTrades(ticker string, date time.Time, opts *RequestOp
 			out = append(out, &(rs.Trades))
 			break
 		}
-		//fmt.Println(rs.Trades[0], rs.Trades[len(rs.Trades)-1], len(rs.Trades))
 		out = append(out, &(rs.Trades))
 		opts.PageToken = rs.PageToken
 	}
@@ -215,7 +214,6 @@ func (c *Client) StockDailyQuotes(ticker string, date time.Time, opts *RequestOp
 			out = append(out, &(rs.Quotes))
 			break
 		}
-		//fmt.Println(rs.Quotes[0], rs.Quotes[len(rs.Quotes)-1], len(rs.Quotes))
 		out = append(out, &(rs.Quotes))
 		opts.PageToken = rs.PageToken
 	}

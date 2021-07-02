@@ -1,7 +1,6 @@
 package alpacaio
 
 import (
-	json "encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -34,16 +33,36 @@ type Stream struct {
 	authenticated, closed atomic.Value
 	credentials           credentials
 
-	MessageC chan []byte
-	ErrorC   chan error
+	channels Channels
 }
 
-func GetStream(apiKey, secretKey, streamEndpoint string) (*Stream, error) {
+type Channels struct {
+	TradeChannel   chan StreamingServerMsg
+	QuoteChannel   chan StreamingServerMsg
+	BarChannel     chan StreamingServerMsg
+	ErrorChannel   chan StreamingServerMsg
+	DefaultChannel chan StreamingServerMsg
+}
+
+func (cs Channels) close() {
+	close(cs.TradeChannel)
+	close(cs.QuoteChannel)
+	close(cs.BarChannel)
+	close(cs.ErrorChannel)
+	close(cs.DefaultChannel)
+}
+
+func GetStream(apiKey, secretKey, streamEndpoint string) (Channels, error) {
 	once.Do(func() {
 		stream = &Stream{
 			authenticated: atomic.Value{},
-			MessageC:      make(chan []byte, 100),
-			ErrorC:        make(chan error, 100),
+			channels: Channels{
+				TradeChannel:   make(chan StreamingServerMsg, 100),
+				QuoteChannel:   make(chan StreamingServerMsg, 100),
+				ErrorChannel:   make(chan StreamingServerMsg, 100),
+				BarChannel:     make(chan StreamingServerMsg, 100),
+				DefaultChannel: make(chan StreamingServerMsg, 100),
+			},
 			credentials: credentials{apiKey: apiKey,
 				secretKey:      secretKey,
 				streamEndpoint: streamEndpoint},
@@ -51,14 +70,14 @@ func GetStream(apiKey, secretKey, streamEndpoint string) (*Stream, error) {
 		stream.authenticated.Store(false)
 		stream.closed.Store(false)
 	})
-	err := stream.Register()
+	err := stream.register()
 	if err != nil {
-		return nil, err
+		return Channels{}, err
 	}
-	return stream, nil
+	return stream.channels, nil
 }
 
-func (s *Stream) Register() error {
+func (s *Stream) register() error {
 	var err error
 	if s.conn == nil {
 		s.conn, err = s.openSocket()
@@ -74,45 +93,44 @@ func (s *Stream) Register() error {
 	return nil
 }
 
-func (s *Stream) Subscribe(channel string, tickers []string) error {
-	if err := s.sub(channel, tickers); err != nil {
+func Subscribe(channel string, tickers []string) error {
+	if err := stream.sub(channel, tickers); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Stream) Unsubscribe(channel string, tickers []string) error {
+func Unsubscribe(channel string, tickers []string) error {
 	var err error
-	if s.conn == nil {
+	if stream.conn == nil {
 		return errors.New("connection has not been initialized")
 	}
-	if err = s.auth(); err != nil {
+	if err = stream.auth(); err != nil {
 		return err
 	}
-	if err = s.unsub(channel, tickers); err != nil {
+	if err = stream.unsub(channel, tickers); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *Stream) Close() error {
-	s.Lock()
-	defer s.Unlock()
+func Close() error {
+	stream.Lock()
+	defer stream.Unlock()
 
-	if s.conn == nil {
+	if stream.conn == nil {
 		return nil
 	}
 
-	if err := s.conn.WriteMessage(
+	if err := stream.conn.WriteMessage(
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 	); err != nil {
 		return err
 	}
-	s.closed.Store(true)
-	close(s.MessageC)
-	close(s.ErrorC)
-	return s.conn.Close()
+	stream.closed.Store(true)
+	stream.channels.close()
+	return stream.conn.Close()
 }
 
 func (s *Stream) openSocket() (*websocket.Conn, error) {
@@ -153,7 +171,6 @@ func (s *Stream) auth() error {
 	}
 	connected := []ServerAuthMsg{}
 	authorized := []ServerAuthMsg{}
-	// ensure the auth response comes in a timely manner
 	s.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	defer s.conn.SetReadDeadline(time.Time{})
 
@@ -164,7 +181,6 @@ func (s *Stream) auth() error {
 		return err
 	}
 
-	fmt.Println(append(connected, authorized...))
 	for _, m := range append(connected, authorized...) {
 		if m.Message == "authenticated" {
 			s.authenticated.Store(true)
@@ -172,6 +188,14 @@ func (s *Stream) auth() error {
 		}
 	}
 	return fmt.Errorf("failed to authorize alpaca stream")
+}
+
+func (s *Stream) errorMake(msg string) StreamingServerMsg {
+	return StreamingServerMsg{
+		Event:   `error`,
+		Code:    10000,
+		Message: msg,
+	}
 }
 
 func (s *Stream) start() {
@@ -183,20 +207,19 @@ func (s *Stream) start() {
 			} else if websocket.IsCloseError(err, code) {
 				err := s.reconnect()
 				if err != nil {
-					s.ErrorC <- err
-					s.conn = nil
-					fmt.Println(fmt.Sprintf("unknown error %+v", err))
-					return
+					s.channels.ErrorChannel <- s.errorMake(err.Error())
 				}
 				continue
 			} else {
-				s.ErrorC <- err
-				s.conn = nil
-				fmt.Println(fmt.Sprintf("unknown error %+v", err))
-				return
+				s.channels.ErrorChannel <- s.errorMake(err.Error())
+				continue
 			}
 		}
-		s.MessageC <- bts
+		go func() {
+			if err := s.parseStreamMessages(bts); err != nil {
+				s.channels.ErrorChannel <- s.errorMake(err.Error())
+			}
+		}()
 	}
 }
 
@@ -215,7 +238,7 @@ func (s *Stream) sub(channel string, tickers []string) error {
 	case `trades`:
 		subReq.Trades = tickers
 	case `quotes`:
-		subReq.Trades = tickers
+		subReq.Quotes = tickers
 	case `bars`:
 		subReq.Bars = tickers
 	default:
@@ -229,8 +252,8 @@ func (s *Stream) sub(channel string, tickers []string) error {
 
 func (s *Stream) unsub(channel string, tickers []string) error {
 	s.Lock()
-
 	defer s.Unlock()
+
 	subReq := ClientSubcribeMsg{
 		Action: "unsubscribe",
 	}
@@ -260,6 +283,29 @@ func (s *Stream) reconnect() error {
 	return nil
 }
 
+func (s *Stream) parseStreamMessages(bts []byte) error {
+	var msgTypes StreamingServerMsges
+	err := ej.Unmarshal(bts, &msgTypes)
+	if err != nil {
+		return err
+	}
+	for _, msg := range msgTypes {
+		switch msg.Event {
+		case `t`:
+			s.channels.TradeChannel <- msg
+		case `q`:
+			s.channels.QuoteChannel <- msg
+		case `b`:
+			s.channels.BarChannel <- msg
+		case `error`:
+			s.channels.ErrorChannel <- msg
+		default:
+			s.channels.DefaultChannel <- msg
+		}
+	}
+	return nil
+}
+
 type ClientAuthMsg struct {
 	Action    string `json:"action,omitempty" msgpack:"action"`
 	APIKey    string `json:"key,omitempty"`
@@ -276,16 +322,4 @@ type ClientSubcribeMsg struct {
 type ServerAuthMsg struct {
 	EventName string `json:"T" msgpack:"stream"`
 	Message   string `json:"msg"`
-}
-
-func ParseEvents(bts []byte, isEJ ...bool) (StreamingServerMsges, error) {
-	iEJ := true
-	var out StreamingServerMsges
-	var err error
-	if iEJ {
-		err = ej.Unmarshal(bts, &out)
-	} else {
-		err = json.Unmarshal(bts, &out)
-	}
-	return out, err
 }

@@ -3,6 +3,7 @@ package alpacaio
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -202,16 +203,28 @@ func (s *Stream) start() {
 	for {
 		code, bts, err := s.conn.ReadMessage()
 		if err != nil {
+			s.channels.ErrorChannel <- s.errorMake("stream read message error: " + err.Error() + strconv.Itoa(code))
 			if s.closed.Load().(bool) {
 				return
 			} else if websocket.IsCloseError(err, code) {
-				err := s.reconnect()
-				if err != nil {
-					s.channels.ErrorChannel <- s.errorMake(err.Error())
+				for err != nil {
+					err = s.reconnect()
+					if err != nil {
+						s.channels.ErrorChannel <- s.errorMake("stream reconnect error: " + err.Error())
+					}
+					fmt.Println(fmt.Sprintf("trying to reconnect: %+v", err))
+					time.Sleep(time.Duration(10) * time.Second)
 				}
 				continue
 			} else {
-				s.channels.ErrorChannel <- s.errorMake(err.Error())
+				for err != nil {
+					err = s.reconnect()
+					if err != nil {
+						s.channels.ErrorChannel <- s.errorMake("stream reconnect error: " + err.Error())
+					}
+					fmt.Println(fmt.Sprintf("trying to reconnect: %+v", err))
+					time.Sleep(time.Duration(10) * time.Second)
+				}
 				continue
 			}
 		}

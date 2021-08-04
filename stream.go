@@ -34,7 +34,8 @@ type Stream struct {
 	authenticated, closed atomic.Value
 	credentials           credentials
 
-	channels Channels
+	channels           Channels
+	subscribedChannels *sync.Map
 }
 
 type Channels struct {
@@ -67,6 +68,7 @@ func GetStream(apiKey, secretKey, streamEndpoint string) (Channels, error) {
 			credentials: credentials{apiKey: apiKey,
 				secretKey:      secretKey,
 				streamEndpoint: streamEndpoint},
+			subscribedChannels: &sync.Map{},
 		}
 		stream.authenticated.Store(false)
 		stream.closed.Store(false)
@@ -236,6 +238,24 @@ func (s *Stream) start() {
 	}
 }
 
+func (s *Stream) updateSubscribedChannels(channel string, tickers []string) error {
+	if val, ok := s.subscribedChannels.Load(channel); ok {
+		subscribed := append(val.([]string), tickers...)
+		s.subscribedChannels.Store(channel, subscribed)
+		return nil
+	}
+	s.subscribedChannels.Store(channel, tickers)
+}
+
+func (s *Stream) loadSubcribedChannels() (map[string][]string, error) {
+	our := make(map[string][]string)
+	s.subscribedChannels.Range(func(key, value interface{}) bool {
+		out[key] = value.([]string)
+		return true
+	})
+	return out
+}
+
 func (s *Stream) sub(channel string, tickers []string) error {
 	s.Lock()
 	defer s.Unlock()
@@ -260,6 +280,7 @@ func (s *Stream) sub(channel string, tickers []string) error {
 	if err := s.conn.WriteJSON(subReq); err != nil {
 		return err
 	}
+	s.updateSubscribedChannels(channel, tickers)
 	return nil
 }
 
@@ -292,6 +313,13 @@ func (s *Stream) reconnect() error {
 	}
 	if err = s.auth(); err != nil {
 		return err
+	}
+	subscribed := s.loadSubcribedChannels()
+	for k, v := range subscribed {
+		err = s.sub(k, v)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
